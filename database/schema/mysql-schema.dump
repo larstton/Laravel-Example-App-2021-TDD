@@ -1,0 +1,733 @@
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `activity_log` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `team_id` char(36) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `log_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `subject_id` char(36) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `subject_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `causer_id` char(36) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `causer_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `properties` json DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `activity_log_log_name_index` (`log_name`),
+  KEY `activity_log_created_at_index` (`created_at`),
+  KEY `subject` (`subject_id`,`subject_type`),
+  KEY `causer` (`causer_id`,`causer_type`),
+  KEY `activity_log_team_id_index` (`team_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `api_tokens` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `team_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `token` varchar(48) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `capability` enum('ro','rw') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `last_usage_ip_address` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `last_used_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `api_tokens_team_id_name_unique` (`team_id`,`name`),
+  KEY `api_tokens_team_id_index` (`team_id`),
+  KEY `api_tokens_token_index` (`token`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `cagent_tracker` (
+  `host_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `host_hash` char(32) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `host_info` json NOT NULL,
+  `count` bigint(20) NOT NULL,
+  `next_reminder_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  UNIQUE KEY `cagent_tracker_host_id_host_hash_unique` (`host_id`,`host_hash`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `check_results` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `check_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `host_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `check_type` enum('serviceCheck','webCheck','customCheck','cagent','snmpCheck') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `data` json NOT NULL,
+  `success` tinyint(1) DEFAULT NULL,
+  `frontman_id` char(36) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `user_agent` text COLLATE utf8mb4_unicode_ci,
+  `data_updated_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `check_results_check_id_index` (`check_id`),
+  KEY `check_results_host_id_index` (`host_id`),
+  KEY `check_results_check_type_index` (`check_type`),
+  KEY `check_results_data_updated_at_index` (`data_updated_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `cpu_utilisation_snapshots` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `host_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `settings` json NOT NULL,
+  `top` json NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `cpu_utilisation_snapshots_host_id_index` (`host_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `custom_checks` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `host_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `user_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(25) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `token` varchar(12) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `expected_update_interval` int(10) unsigned DEFAULT NULL,
+  `last_influx_error` text COLLATE utf8mb4_unicode_ci,
+  `last_checked_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `custom_checks_host_id_name_unique` (`host_id`,`name`),
+  UNIQUE KEY `custom_checks_token_unique` (`token`),
+  KEY `custom_checks_host_id_index` (`host_id`),
+  KEY `custom_checks_user_id_index` (`user_id`),
+  KEY `custom_checks_name_index` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `deleted_users` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `product_news` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `event_comments` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `event_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `team_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `user_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `nickname` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `text` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `visible_to_guests` tinyint(3) unsigned NOT NULL DEFAULT '0' COMMENT 'Is the comment visible for guests',
+  `statuspage` tinyint(3) unsigned NOT NULL DEFAULT '0' COMMENT 'Publish comment on status pages',
+  `forward` tinyint(3) unsigned NOT NULL DEFAULT '0' COMMENT 'Forward comment to subscribed email recipients.',
+  `created_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `event_comments_event_id_index` (`event_id`),
+  KEY `event_comments_team_id_index` (`team_id`),
+  CONSTRAINT `event_comments_event_id_foreign` FOREIGN KEY (`event_id`) REFERENCES `events` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `events` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `team_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `host_id` char(36) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `rule_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `check_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `check_key` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `action` enum('warn','alert','snooze','ignore') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `state` tinyint(3) unsigned NOT NULL DEFAULT '1',
+  `reminders` tinyint(3) unsigned NOT NULL DEFAULT '1',
+  `meta` json DEFAULT NULL,
+  `affected_host_id` char(36) COLLATE utf8mb4_unicode_ci GENERATED ALWAYS AS (json_unquote(json_extract(`meta`,'$.affectedHost.uuid'))) VIRTUAL,
+  `is_agent_event` tinyint(1) GENERATED ALWAYS AS ((`host_id` = `check_id`)) VIRTUAL,
+  `last_check_value` text COLLATE utf8mb4_unicode_ci,
+  `last_checked_at` timestamp NULL DEFAULT NULL,
+  `resolved_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `events_created_at_index` (`created_at`),
+  KEY `events_team_id_created_at_resolved_at_index` (`team_id`,`created_at`,`resolved_at`),
+  KEY `events_team_id_index` (`team_id`),
+  KEY `events_host_id_index` (`host_id`),
+  KEY `events_check_id_index` (`check_id`),
+  KEY `events_action_index` (`action`),
+  KEY `events_state_index` (`state`),
+  KEY `events_affected_host_id_index` (`affected_host_id`),
+  KEY `events_is_agent_event_index` (`is_agent_event`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `failed_jobs` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `uuid` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `connection` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `queue` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `payload` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `exception` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `failed_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `failed_jobs_uuid_unique` (`uuid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `frontmen` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `team_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `location` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `last_heartbeat_at` timestamp NULL DEFAULT NULL,
+  `password` varchar(18) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `user_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `host_info` json DEFAULT NULL,
+  `host_info_last_updated_at` timestamp NULL DEFAULT NULL,
+  `version` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `frontmen_team_id_index` (`team_id`),
+  KEY `frontmen_user_id_index` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `host_histories` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `host_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `team_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `user_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `paid` tinyint(1) DEFAULT '0',
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `host_histories_host_id_index` (`host_id`),
+  KEY `host_histories_team_id_index` (`team_id`),
+  KEY `host_histories_user_id_index` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `hosts` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `team_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `frontman_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `sub_unit_id` char(36) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `tags_v2` json DEFAULT NULL,
+  `state` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'PENDING',
+  `user_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `last_update_user_id` char(36) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `password` varchar(12) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `connect` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `active` tinyint(1) NOT NULL DEFAULT '1',
+  `cagent` tinyint(1) DEFAULT '0',
+  `cagent_last_updated_at` timestamp NULL DEFAULT NULL,
+  `snmp_check_last_updated_at` timestamp NULL DEFAULT NULL,
+  `web_check_last_updated_at` timestamp NULL DEFAULT NULL,
+  `service_check_last_updated_at` timestamp NULL DEFAULT NULL,
+  `custom_check_last_updated_at` timestamp NULL DEFAULT NULL,
+  `inventory` json DEFAULT NULL,
+  `cagent_metrics` int(10) unsigned DEFAULT '0',
+  `dashboard` tinyint(1) DEFAULT '1',
+  `muted` tinyint(1) DEFAULT '0',
+  `hw_inventory` json DEFAULT NULL,
+  `snmp_protocol` enum('v2','v3') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `snmp_port` int(10) unsigned DEFAULT NULL,
+  `snmp_community` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `snmp_timeout` int(10) unsigned DEFAULT NULL,
+  `snmp_privacy_protocol` enum('des','aes') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `snmp_security_level` enum('authPriv','noAuthNoPriv','authNoPriv') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `snmp_authentication_protocol` enum('sha','md5') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `snmp_username` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `snmp_authentication_password` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `snmp_privacy_password` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `hosts_name_team_id_unique` (`name`,`team_id`),
+  UNIQUE KEY `hosts_connect_team_id_unique` (`connect`,`team_id`),
+  KEY `hosts_team_id_index` (`team_id`),
+  KEY `hosts_frontman_id_index` (`frontman_id`),
+  KEY `hosts_sub_unit_id_index` (`sub_unit_id`),
+  KEY `hosts_user_id_index` (`user_id`),
+  KEY `hosts_last_update_user_id_index` (`last_update_user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `jobmon_results` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `host_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `job_id` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `data` json NOT NULL,
+  `next_run` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `jobmon_results_host_id_index` (`host_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `jobs` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `queue` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `payload` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `attempts` tinyint(3) unsigned NOT NULL,
+  `reserved_at` int(10) unsigned DEFAULT NULL,
+  `available_at` int(10) unsigned NOT NULL,
+  `created_at` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `jobs_queue_index` (`queue`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `migrations` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `migration` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `batch` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `paid_message_log` (
+  `recipient_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `team_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `media_type` enum('email','slack','sms','pushover','telegram','webhook','whatsapp','phonecall','msteams','integromat') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `sendto` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  KEY `paid_message_log_recipient_id_index` (`recipient_id`),
+  KEY `paid_message_log_team_id_index` (`team_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `password_resets` (
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `token` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  KEY `password_resets_email_index` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `recipients` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `team_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `user_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `verified` tinyint(1) NOT NULL DEFAULT '0',
+  `active` tinyint(1) NOT NULL DEFAULT '1',
+  `verification_token` varchar(8) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `permanent_failures_last_24_h` int(11) DEFAULT '0',
+  `administratively_disabled` tinyint(1) NOT NULL DEFAULT '0',
+  `media_type` enum('email','slack','sms','pushover','telegram','webhook','whatsapp','phonecall','msteams','integromat') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `sendto` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `option1` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `reminder_delay` int(11) NOT NULL DEFAULT '600',
+  `maximum_reminders` int(11) NOT NULL DEFAULT '3',
+  `reminders` tinyint(1) NOT NULL DEFAULT '0',
+  `daily_reports` tinyint(1) NOT NULL DEFAULT '0',
+  `monthly_reports` tinyint(1) NOT NULL DEFAULT '0',
+  `daily_summary` tinyint(1) NOT NULL DEFAULT '0',
+  `weekly_reports` tinyint(1) NOT NULL DEFAULT '0',
+  `comments` tinyint(1) NOT NULL DEFAULT '0',
+  `alerts` tinyint(1) NOT NULL DEFAULT '0',
+  `warnings` tinyint(1) NOT NULL DEFAULT '0',
+  `event_uuids` tinyint(1) NOT NULL DEFAULT '0',
+  `recoveries` tinyint(1) NOT NULL DEFAULT '0',
+  `rules` json DEFAULT NULL,
+  `extra_data` json DEFAULT NULL,
+  `verified_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `recipients_team_id_index` (`team_id`),
+  KEY `recipients_user_id_index` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `reminders` (
+  `recipient_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `event_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `reminders_count` int(11) NOT NULL DEFAULT '0',
+  `last_reminder_created_at` timestamp NULL DEFAULT NULL,
+  KEY `reminders_recipient_id_index` (`recipient_id`),
+  KEY `reminders_event_id_index` (`event_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `rules` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `team_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `host_match_part` enum('name','uuid','connect','tag','none') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `host_match_criteria` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `finish` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `action` enum('warn','alert','snooze','ignore') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `position` mediumint(8) unsigned NOT NULL,
+  `check_key` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `check_type` set('serviceCheck','webCheck','customCheck','cagent','snmpCheck') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `function` enum('last','sum','avg','min','max') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `operator` enum('<','>','<>','=','empty','notEmpty') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `key_function` json DEFAULT NULL,
+  `results_range` smallint(5) unsigned NOT NULL,
+  `threshold` double(20,4) NOT NULL,
+  `user_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `active` tinyint(3) unsigned NOT NULL,
+  `expression_alias` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `checksum` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `mandatory` tinyint(3) unsigned NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `rules_checksum_unique` (`checksum`),
+  KEY `rules_team_id_position_index` (`team_id`,`position`),
+  KEY `rules_team_id_index` (`team_id`),
+  KEY `rules_user_id_index` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `service_checks` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `host_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `user_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `active` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `check_interval` int(10) unsigned NOT NULL DEFAULT '60',
+  `protocol` enum('tcp','udp','icmp','ssl') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `service` enum('http','https','ssh','imap','imaps','pop3','smtp','smtps','pop3s','tcp','ping','sip','iax2') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `port` int(10) unsigned NOT NULL DEFAULT '0',
+  `in_progress` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `last_success` tinyint(3) unsigned DEFAULT NULL,
+  `last_message` text COLLATE utf8mb4_unicode_ci,
+  `last_checked_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `service_checks_host_id_protocol_service_port_index` (`host_id`,`protocol`,`service`,`port`),
+  KEY `service_checks_host_id_index` (`host_id`),
+  KEY `service_checks_user_id_index` (`user_id`),
+  KEY `service_checks_active_index` (`active`),
+  KEY `service_checks_in_progress_index` (`in_progress`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `snmp_checks` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `host_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `user_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `active` tinyint(3) unsigned NOT NULL DEFAULT '1',
+  `check_interval` int(10) unsigned NOT NULL DEFAULT '90',
+  `preset` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `last_success` tinyint(3) unsigned DEFAULT NULL,
+  `last_message` text COLLATE utf8mb4_unicode_ci,
+  `last_checked_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `snmp_checks_host_id_index` (`host_id`),
+  KEY `snmp_checks_user_id_index` (`user_id`),
+  KEY `snmp_checks_active_index` (`active`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `status_pages` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `team_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `token` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `title` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `meta` json DEFAULT NULL,
+  `image` mediumblob,
+  `image_content_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `status_pages_team_id_index` (`team_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `sub_units` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `team_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `short_id` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `information` text COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `sub_units_team_id_short_id_unique` (`team_id`,`short_id`),
+  KEY `sub_units_team_id_index` (`team_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `support_requests` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `user_id` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `subject` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `body` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `state` enum('open','in_progress','closed') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'open',
+  `attachment` json DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `support_requests_user_id_index` (`user_id`),
+  KEY `support_requests_email_index` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `taggables` (
+  `tag_id` int(10) unsigned NOT NULL,
+  `taggable_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `taggable_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  UNIQUE KEY `taggables_tag_id_taggable_id_taggable_type_unique` (`tag_id`,`taggable_id`,`taggable_type`),
+  KEY `taggables_taggable_type_taggable_id_index` (`taggable_type`,`taggable_id`),
+  CONSTRAINT `taggables_tag_id_foreign` FOREIGN KEY (`tag_id`) REFERENCES `tags` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tags` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `team_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` json NOT NULL,
+  `slug` json NOT NULL,
+  `type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `order_column` int(11) DEFAULT NULL,
+  `meta` json DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `tags_team_id_index` (`team_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `team_settings` (
+  `team_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `value` json NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`team_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `team_statistics` (
+  `team_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `key` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `value` int(11) NOT NULL,
+  `last_summary_at` timestamp NULL DEFAULT NULL,
+  `last_summary_total` int(11) NOT NULL,
+  KEY `team_statistics_team_id_index` (`team_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `teams` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `max_hosts` mediumint(8) unsigned NOT NULL DEFAULT '5',
+  `max_members` smallint(5) unsigned NOT NULL DEFAULT '10',
+  `max_recipients` mediumint(8) unsigned NOT NULL DEFAULT '10',
+  `default_frontman_id` char(36) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `max_frontmen` mediumint(8) unsigned NOT NULL,
+  `min_check_interval` mediumint(8) unsigned NOT NULL DEFAULT '90',
+  `data_retention` mediumint(8) unsigned DEFAULT NULL,
+  `plan` varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `previous_plan` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `timezone` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Etc/GMT',
+  `currency` varchar(15) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `registration_track` json DEFAULT NULL,
+  `partner` varchar(80) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `partner_extra_data` json DEFAULT NULL,
+  `date_format` varchar(2) COLLATE utf8mb4_unicode_ci DEFAULT 'L.',
+  `has_granted_access_to_support` tinyint(3) unsigned DEFAULT '0',
+  `plan_last_changed_at` timestamp NULL DEFAULT NULL,
+  `trial_ends_at` timestamp NULL DEFAULT NULL,
+  `upgraded_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  KEY `teams_id_index` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `telescope_entries` (
+  `sequence` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `uuid` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `batch_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `family_hash` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `should_display_on_index` tinyint(1) NOT NULL DEFAULT '1',
+  `type` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `content` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`sequence`),
+  UNIQUE KEY `telescope_entries_uuid_unique` (`uuid`),
+  KEY `telescope_entries_batch_id_index` (`batch_id`),
+  KEY `telescope_entries_family_hash_index` (`family_hash`),
+  KEY `telescope_entries_created_at_index` (`created_at`),
+  KEY `telescope_entries_type_should_display_on_index_index` (`type`,`should_display_on_index`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `telescope_entries_tags` (
+  `entry_uuid` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tag` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  KEY `telescope_entries_tags_entry_uuid_tag_index` (`entry_uuid`,`tag`),
+  KEY `telescope_entries_tags_tag_index` (`tag`),
+  CONSTRAINT `telescope_entries_tags_entry_uuid_foreign` FOREIGN KEY (`entry_uuid`) REFERENCES `telescope_entries` (`uuid`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `telescope_monitoring` (
+  `tag` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `user_settings` (
+  `user_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `value` json NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `users` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `role` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'ROLE_TEAM_ADMIN',
+  `team_status` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'JOINED',
+  `terms_accepted` tinyint(1) NOT NULL,
+  `privacy_accepted` tinyint(1) NOT NULL,
+  `product_news` tinyint(1) NOT NULL DEFAULT '1',
+  `nickname` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `host_tag` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `lang` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT 'en',
+  `team_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `sub_unit_id` char(36) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `notes` text COLLATE utf8mb4_unicode_ci,
+  `remember_token` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `email_verified_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `users_email_unique` (`email`),
+  KEY `users_team_id_index` (`team_id`),
+  KEY `users_sub_unit_id_index` (`sub_unit_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `web_checks` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `host_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `user_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `path` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '/',
+  `protocol` enum('https','http') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `port` int(10) unsigned DEFAULT NULL,
+  `expected_pattern` varchar(75) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `expected_pattern_presence` enum('present','absent') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'present',
+  `expected_http_status` mediumint(8) unsigned DEFAULT NULL,
+  `search_html_source` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `time_out` double(8,2) NOT NULL,
+  `ignore_ssl_errors` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `check_interval` mediumint(8) unsigned NOT NULL DEFAULT '90',
+  `dont_follow_redirects` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `method` enum('GET','POST','PUT','PATCH','DELETE','HEAD','OPTIONS') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'GET',
+  `active` tinyint(3) unsigned NOT NULL DEFAULT '1',
+  `in_progress` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `last_success` tinyint(3) unsigned DEFAULT NULL,
+  `last_message` text COLLATE utf8mb4_unicode_ci,
+  `post_data` text COLLATE utf8mb4_unicode_ci,
+  `headers` json DEFAULT NULL,
+  `headers_md5_sum` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '0',
+  `last_checked_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `web_checks_host_id_path_method_port_headers_md5_sum_unique` (`host_id`,`path`,`method`,`port`,`headers_md5_sum`),
+  KEY `web_checks_host_id_index` (`host_id`),
+  KEY `web_checks_user_id_index` (`user_id`),
+  KEY `web_checks_active_index` (`active`),
+  KEY `web_checks_in_progress_index` (`in_progress`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+INSERT INTO `migrations` VALUES (1,'2014_10_12_000000_create_users_table',1);
+INSERT INTO `migrations` VALUES (2,'2014_10_12_100000_create_password_resets_table',1);
+INSERT INTO `migrations` VALUES (3,'2018_08_08_100000_create_telescope_entries_table',1);
+INSERT INTO `migrations` VALUES (4,'2019_08_19_000000_create_failed_jobs_table',1);
+INSERT INTO `migrations` VALUES (5,'2020_05_08_131839_create_teams_table',1);
+INSERT INTO `migrations` VALUES (6,'2020_05_12_115320_create_rules_table',1);
+INSERT INTO `migrations` VALUES (7,'2020_05_13_121236_create_hosts_table',1);
+INSERT INTO `migrations` VALUES (8,'2020_05_13_134549_create_recipients_table',1);
+INSERT INTO `migrations` VALUES (9,'2020_05_14_105020_create_frontmen_table',1);
+INSERT INTO `migrations` VALUES (10,'2020_05_18_132248_create_host_histories_table',1);
+INSERT INTO `migrations` VALUES (11,'2020_05_18_134716_create_activity_log_table',1);
+INSERT INTO `migrations` VALUES (12,'2020_05_22_160511_create_sub_units_table',1);
+INSERT INTO `migrations` VALUES (13,'2020_05_25_125528_create_web_checks_table',1);
+INSERT INTO `migrations` VALUES (14,'2020_05_26_085057_create_api_tokens_table',1);
+INSERT INTO `migrations` VALUES (15,'2020_05_26_095108_create_team_settings_table',1);
+INSERT INTO `migrations` VALUES (16,'2020_05_26_160828_create_events_table',1);
+INSERT INTO `migrations` VALUES (17,'2020_05_26_164042_create_event_comments_table',1);
+INSERT INTO `migrations` VALUES (18,'2020_05_27_093457_create_service_checks_table',1);
+INSERT INTO `migrations` VALUES (19,'2020_05_27_123709_create_snmp_checks_table',1);
+INSERT INTO `migrations` VALUES (20,'2020_05_28_082906_create_custom_checks_table',1);
+INSERT INTO `migrations` VALUES (21,'2020_05_28_104824_create_user_settings_table',1);
+INSERT INTO `migrations` VALUES (22,'2020_06_02_062910_create_support_requests_table',1);
+INSERT INTO `migrations` VALUES (23,'2020_06_03_123453_create_check_results_table',1);
+INSERT INTO `migrations` VALUES (24,'2020_06_06_101454_create_jobmon_results_table',1);
+INSERT INTO `migrations` VALUES (25,'2020_06_06_101943_create_cpu_utilisation_snapshots_table',1);
+INSERT INTO `migrations` VALUES (26,'2020_06_19_074356_create_status_pages_table',1);
+INSERT INTO `migrations` VALUES (27,'2020_08_29_093047_create_tag_tables',1);
+INSERT INTO `migrations` VALUES (28,'2020_10_11_122153_create_cagent_tracker_table',1);
+INSERT INTO `migrations` VALUES (29,'2020_10_13_085112_create_jobs_table',1);
+INSERT INTO `migrations` VALUES (30,'2020_10_15_151443_create_paid_message_log_table',1);
+INSERT INTO `migrations` VALUES (31,'2020_10_16_082708_create_reminders_table',1);
+INSERT INTO `migrations` VALUES (32,'2020_10_26_112229_create_team_statistics_table',1);
+INSERT INTO `migrations` VALUES (33,'2020_10_28_134806_add_plan_last_changed_at_and_previous_plan_to_teams_table',1);
+INSERT INTO `migrations` VALUES (34,'2020_10_28_152436_create_deleted_users_table',1);
+INSERT INTO `migrations` VALUES (35,'2020_11_06_105648_update_image_column_status_pages',1);
+INSERT INTO `migrations` VALUES (36,'2020_11_10_140356_make_web_check_index_unique_on_web_checks_table',1);

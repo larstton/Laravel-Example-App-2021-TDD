@@ -1,0 +1,111 @@
+image: ubuntu:focal
+
+definitions:
+  caches:
+    downloads: ~/downloads
+  steps:
+    - step: &build
+        name: Build and Test
+        artifacts:
+          - build*.tar.gz
+        script:
+          - apt-get -qq update
+          - >-
+            DEBIAN_FRONTEND=noninteractive apt-get install -y
+            unzip php-common php-mysql php-yaml php-http php7.4-bcmath php7.4-bz2 php7.4-cli php7.4-common
+            php7.4-curl php7.4-json php7.4-mbstring php7.4-mysql php7.4-opcache php-apcu git
+            php7.4-readline php7.4-soap php7.4-xml php7.4-zip php7.4-gd wget curl
+          - curl -sS https://getcomposer.org/installer -o composer-setup.php
+          - php composer-setup.php --install-dir=. --filename=composer
+          - ./composer -V
+#          - composer check-platform-reqs
+          - ./composer install --no-plugins --no-scripts --no-progress --optimize-autoloader --no-interaction --ignore-platform-reqs
+
+          # Prepare .env for environment
+          - cp ".env.$BITBUCKET_DEPLOYMENT_ENVIRONMENT" .env
+          - echo "DB_USERNAME=$DB_USERNAME">>.env
+          - echo "DB_PASSWORD=$DB_PASSWORD">>.env
+          - echo "NOTIFIER_PASSWORD=$NOTIFIER_PASSWORD">>.env
+          - echo "CHECKOUT_PASSWORD=$CHECKOUT_PASSWORD">>.env
+          - echo "LOOPHOLE_PASSWORD=$LOOPHOLE_PASSWORD">>.env
+          - echo "STRIPE_KEY=$STRIPE_KEY">>.env
+          - rm .env.*
+
+          - echo "Saving release sha to commit_hash dotfile."
+          - echo $BITBUCKET_COMMIT > .commit_hash
+          - echo "${BITBUCKET_COMMIT} saved."
+
+          # Execute tests
+          #- php vendor/bin/phpunit tests/.
+
+          # Create a build
+          - export VERSION=${BITBUCKET_REPO_SLUG}-${BITBUCKET_BRANCH}${BITBUCKET_TAG}-${BITBUCKET_BUILD_NUMBER}
+          - export BUILD=build-${VERSION}.tar.gz
+          - date>build.txt
+          - echo $VERSION>>build.txt
+          - git log -1>>build.txt
+          # Create the artifacts file first, otherwise you will get an error "file changed as we read it"
+          - touch $BUILD
+          - >-
+            tar --exclude=$BUILD
+            --exclude=./tests/Concerns
+            --exclude=./tests/Feature
+            --exclude=./tests/Unit
+            --exclude=./tests/CreatesApplication.php
+            --exclude=./tests/TestCase.php
+            --exclude=./logs/*
+            --exclude=.git
+            --exclude=phpunit.xml
+            --exclude=composer.lock
+            --exclude=bitbucket-pipelines.yml
+            --exclude=phpunit.xml
+            --exclude=server.php
+            --exclude=webpack.mix.js
+            --exclude=.php_*
+            --exclude=.styleci.yml
+            --exclude=_ide_helper_models.php
+            -zcvf $BUILD .
+          - ls -lah
+          - md5sum $BUILD
+
+    - step: &deploy-to-staging
+        name: Deploy to staging
+        image: alpine:3.10
+        script:
+          - export VERSION=${BITBUCKET_REPO_SLUG}-${BITBUCKET_BRANCH}${BITBUCKET_TAG}-${BITBUCKET_BUILD_NUMBER}
+          - export BUILD=build-${VERSION}.tar.gz
+          - apk --no-cache add openssh-client
+          - scp -P 24480 $BUILD www-data@playground2.cloudradar.info:/tmp/
+          - cat local_deployment.sh|ssh -p 24480 www-data@playground2.cloudradar.info "BUILD=$BUILD bash -e"
+
+    - step: &deploy-to-prod
+        name: Deploy to prod
+        image: alpine:3.10
+        script:
+          - export VERSION=${BITBUCKET_REPO_SLUG}-${BITBUCKET_BRANCH}${BITBUCKET_TAG}-${BITBUCKET_BUILD_NUMBER}
+          - export BUILD=build-${VERSION}.tar.gz
+          - apk --no-cache add openssh-client
+          - scp -P 24480 $BUILD www-data@app1.cloudradar.io:/tmp/
+          - cat local_deployment.sh|ssh -p 24480 www-data@app1.cloudradar.io "BUILD=$BUILD bash -e"
+
+pipelines:
+  branches:
+    develop:
+      - step:
+          deployment: Staging
+          <<: *build
+      - step: *deploy-to-staging
+  tags:
+    release-*:
+      - step:
+          deployment: Production
+          <<: *build
+      - step: *deploy-to-prod
+    hotfix-*:
+      - step:
+          deployment: Production
+          <<: *build
+      - step: *deploy-to-prod
+  # Use
+  # git tag release-$(date +%s) -m "release $(date +%c)" && git push --follow-tags
+  # to trigger a release to prod

@@ -1,0 +1,14 @@
+[Unit]
+Description=Runs and keeps alive the corev3 artisan queue:work process Instance %i
+OnFailure=failure-notify@%n.service
+
+[Service]
+User=www-data
+Group=www-data
+Restart=always
+WorkingDirectory=/var/www/core_v3
+ExecStart=/usr/bin/php artisan queue:work --tries=3 --name=core_v3
+ExecReload=/usr/bin/php artisan queue:restart
+
+[Install]
+WantedBy=multi-user.target

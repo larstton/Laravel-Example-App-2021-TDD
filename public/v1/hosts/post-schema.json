@@ -1,0 +1,121 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Add a host",
+  "description": "properties of a new host",
+  "type": "object",
+  "required": [
+    "name",
+    "connect"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "description": "The name of the host used for the monitoring.",
+      "type": "string",
+      "maxLength": 256,
+      "minLength": 2
+    },
+    "connect": {
+      "description": "The ip address (ipv4 or ipv6) or the FQDN of the host. If cagent is set true this field becomes optional.",
+      "type": ["string","null"],
+      "minLength": 2,
+      "maxLength": 256
+    },
+    "description": {
+      "description": "A brief summary what this host does.",
+      "type": "string",
+      "maxLength": 1000
+    },
+    "cagent": {
+      "description": "Enable host monitoring by agent. Requires agent installation.",
+      "type": "boolean"
+    },
+    "dashboard": {
+      "description": "Show or hide host on the default dashboard.",
+      "type": "boolean"
+    },
+    "muted": {
+      "description": "If set true no alerts or warning are sent. They appear only on the dashboard.",
+      "type": "boolean"
+    },
+    "frontman": {
+      "description": "optional the UUID of a private frontman the host will be assigned to. This is for intranet monitoring. Frontman must be created prior.",
+      "type": ["string","null"],
+      "maxLength": 36,
+      "minLength": 36
+    },
+    "customerUuid": {
+      "description": "optional the UUID of a customer the host will be assigned to.",
+      "type": ["string","null"],
+      "maxLength": 36,
+      "minLength": 36
+    },
+    "tags": {
+      "description": "A list of tags",
+      "type": ["array","null"],
+      "maxItems": 10,
+      "items": {
+        "type": "string",
+        "minLength":1,
+        "maxLength":30,
+        "pattern": "^[\\w\\d-_\\.:\\s]+$"
+      }
+    },
+    "snmpProtocol":{
+      "description": "SNMP Protocol Version",
+      "type": ["string","null"],
+      "enum": ["v2","v3",null]
+    },
+    "snmpPort":{
+      "description": "SNMP Port",
+      "type": ["int","null"],
+      "minimum": 1,
+      "maximum":  65535
+    },
+    "snmpCommunity": {
+      "description": "SNMP Community String. Only used for v2.",
+      "type": ["string", "null"],
+      "minLength": 1,
+      "maxLength": 255
+    },
+    "snmpTimeout": {
+      "description": "SNMP connection timeout",
+      "type": ["number","null"],
+      "minimum": 0.01,
+      "maximum": 99.99
+    },
+    "snmpPrivacyProtocol": {
+      "description": "SNMP Privacy Protocol for v3",
+      "type": ["string","null"],
+      "enum": ["des","aes",null]
+    },
+    "snmpSecurityLevel": {
+      "description": "SNMP Security Level for v3",
+      "type": ["string","null"],
+      "enum": ["noAuthNoPriv","authPriv","authNoPriv",null]
+    },
+    "snmpAuthenticationProtocol": {
+      "description": "SNMP Authentication Protocol for v3",
+      "type": ["string","null"],
+      "enum": ["sha","md5",null]
+    },
+    "snmpUsername": {
+      "description": "Username for v3 requires snmpSecurityLevel auth and a password",
+      "type": ["string","null"],
+      "minLength": 1,
+      "maxLength": 255
+    },
+    "snmpAuthenticationPassword": {
+      "description": "Authentication Password for v3 requires snmpSecurityLevel and a username",
+      "type": ["string","null"],
+      "minLength": 1,
+      "maxLength": 255
+    },
+    "snmpPrivacyPassword": {
+      "description": "Privacy Password for v3 requires snmpSecurityLevel and a username",
+      "type": ["string","null"],
+      "minLength": 1,
+      "maxLength": 255
+    }
+  }
+}
