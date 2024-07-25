@@ -8,13 +8,11 @@
     ],
     "license": "MIT",
     "require": {
-        "php": "^7.4",
+        "php": "^8.3",
         "ext-json": "*",
         "barryvdh/laravel-ide-helper": "^2.7",
         "beberlei/assert": "^3.2",
-        "bensampo/laravel-enum": "^3.0",
         "calebporzio/sushi": "^2.1",
-        "cloudradar/laravel-settings": "@dev",
         "doctrine/dbal": "2.12",
         "eduardokum/laravel-mail-auto-embed": "^1.0",
         "fideloper/proxy": "^4.2",
@@ -44,7 +42,6 @@
     },
     "require-dev": {
         "beyondcode/laravel-query-detector": "^1.4",
-        "brianium/paratest": "^5.0",
         "facade/ignition": "^2.3.6",
         "fzaninotto/faker": "^1.9.1",
         "itsgoingd/clockwork": "^4.1",
@@ -55,7 +52,10 @@
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
     },
     "extra": {
         "laravel": {
